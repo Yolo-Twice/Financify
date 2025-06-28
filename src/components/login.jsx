@@ -1,34 +1,46 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import SiteBrand from "./siteBrand.jsx";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/firebase.js";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
-  const [email,setEmail]= useState("")
-  const [password,setPassword]= useState("")
-  const [name,setName]= useState("")
-  const [confirmPassword,setconfirmPassword]= useState("")
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  async function handleSubmit(event){
-    event.preventDefault()
-    try{
-      await createUserWithEmailAndPassword(auth,email,password)
-      const user = auth.currentUser;
-      console.log(user)
-      toast.success(isLogin ? "Login Successful" : "Registration Successful");
-    } catch(err){
-      console.error(err)
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!isLogin && password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
     }
 
+    try {
+      if (isLogin) {
+        // Login flow
+        await signInWithEmailAndPassword(auth, email, password);
+        toast.success("Login Successful");
+      } else {
+        // Register flow
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast.success("Registration Successful");
+      }
+
+      const user = auth.currentUser;
+      console.log("Logged in user:", user);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Authentication failed");
+    }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-200 to-purple-300 flex items-center justify-center px-4">
       <div className="bg-white/50 backdrop-blur-md shadow-xl rounded-2xl p-8 border border-white/30 max-w-md w-full">
-
         <div className="flex justify-center mb-6">
           <SiteBrand size="md" />
         </div>
@@ -38,7 +50,6 @@ export default function Login() {
             {isLogin ? "Login" : "Register"}
           </h2>
 
-          {/* Name field for Register */}
           {!isLogin && (
             <div>
               <label className="block text-gray-700 mb-1" htmlFor="name">Name</label>
@@ -48,13 +59,12 @@ export default function Login() {
                 placeholder="John Doe"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-800"
                 required
-                onChange={(e)=>setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 value={name}
               />
             </div>
           )}
 
-          {/* Email */}
           <div>
             <label className="block text-gray-700 mb-1" htmlFor="email">Email</label>
             <input
@@ -63,12 +73,11 @@ export default function Login() {
               placeholder="you@example.com"
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-800"
               required
-              onChange={(e)=>setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               value={email}
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-gray-700 mb-1" htmlFor="password">Password</label>
             <input
@@ -77,12 +86,11 @@ export default function Login() {
               placeholder="••••••••"
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-800"
               required
-              onChange={(e)=>setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               value={password}
             />
           </div>
 
-          {/* Confirm Password for Register */}
           {!isLogin && (
             <div>
               <label className="block text-gray-700 mb-1" htmlFor="confirmPassword">Confirm Password</label>
@@ -92,7 +100,7 @@ export default function Login() {
                 placeholder="••••••••"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-800"
                 required
-                onChange={(e)=>setconfirmPassword(e.target.value)}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 value={confirmPassword}
               />
             </div>
@@ -105,7 +113,6 @@ export default function Login() {
             {isLogin ? "Sign In" : "Register"}
           </button>
 
-          {/* Toggle Link */}
           <p className="text-sm text-gray-500 text-center">
             {isLogin ? (
               <>
