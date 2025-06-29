@@ -2,7 +2,9 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import SiteBrand from "./siteBrand.jsx";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase/firebase.js";
+import { auth,db } from "../firebase/firebase.js";
+import {setDoc,doc} from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate()
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -24,14 +27,22 @@ export default function Login() {
         // Login flow
         await signInWithEmailAndPassword(auth, email, password);
         toast.success("Login Successful");
+        navigate("/profile")
       } else {
         // Register flow
         await createUserWithEmailAndPassword(auth, email, password);
+        const user = auth.currentUser
+        if(user){
+          await setDoc(doc(db,"Users",user.uid),{
+            email: user.email,
+            name:name
+          })
+
+        }
+
         toast.success("Registration Successful");
       }
 
-      const user = auth.currentUser;
-      console.log("Logged in user:", user);
     } catch (err) {
       console.error(err);
       toast.error(err.message || "Authentication failed");
