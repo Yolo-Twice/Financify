@@ -27,7 +27,7 @@ export default function Login() {
         // Login flow
         await signInWithEmailAndPassword(auth, email, password);
         toast.success("Login Successful");
-        navigate("/profile")
+        navigate("/home")
       } else {
         // Register flow
         await createUserWithEmailAndPassword(auth, email, password);

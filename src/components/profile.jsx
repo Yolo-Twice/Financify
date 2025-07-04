@@ -1,19 +1,12 @@
-import { auth,db } from "../firebase/firebase"
+import { useAuth } from "../Effects/AuthContext"
 import { useState } from "react"
-
+import { db } from "../firebase/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Profile(){
-    const [userDetails,setUserDetails]=useState(null)
-    const fetchUserData = async() => {
-        auth.onAuthStateChange(async (user)=>{
-            console.log(user)
-            setUserDetails(user)
-        })
-    }
-
+    const { user,userData } = useAuth();
+    
     return (
-        <div>
-            <button onClick={fetchUserData}>Click ME!</button>
-        </div>
+            <p className="mx-auto">Welcome to FinaciFY, {userData?.name.split(" ")[0]}</p>
     )
 }
